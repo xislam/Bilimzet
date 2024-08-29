@@ -34,7 +34,7 @@ class LoginOrRegisterView(TokenObtainPairView):
             )
             # Отправка кода подтверждения
             verification_code = random.randint(100000, 999999)
-            sms_text = f'От TOP SHOP ваш код верификации: {verification_code}'
+            sms_text = f'От Bilimzet ваш код верификации: {verification_code}'
             send_sms(user.phone_number, sms_text)
 
             # Сохранение кода подтверждения в базе данных
@@ -60,7 +60,7 @@ class LoginOrRegisterView(TokenObtainPairView):
         else:
             # Если номер телефона не подтвержден, отправляем код подтверждения
             verification_code = random.randint(100000, 999999)
-            sms_text = f'От TOP SHOP ваш код верификации: {verification_code}'
+            sms_text = f'От Bilimzet ваш код верификации: {verification_code}'
             send_sms(user.phone_number, sms_text)
 
             # Сохранение кода подтверждения в базе данных
