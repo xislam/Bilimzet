@@ -27,11 +27,11 @@ class RegistrationView(generics.CreateAPIView):
             # Отправить SMS-код подтверждения пользователю
             verification_code = random.randint(100000, 999999)
             sms_text = f'От Bilimzet ваш код верификации: {verification_code}'
+            existing_user.verification_code = verification_code
+            existing_user.save()
             send_sms(phone_number, sms_text)
 
             # Сохранить код подтверждения в базе данных или кэше для дальнейшей проверки
-            existing_user.verification_code = verification_code
-            existing_user.save()
 
             return Response({'detail': 'Verification code sent'}, status=status.HTTP_200_OK)
         else:
@@ -46,16 +46,14 @@ class RegistrationView(generics.CreateAPIView):
             # Отправить SMS-код подтверждения пользователю
             verification_code = random.randint(100000, 999999)
             sms_text = f'От  Bilimzet ваш код верификации: {verification_code}'
+            user.verification_code = verification_code
+            user.save()
             send_sms(phone_number, sms_text)
 
             # Сохранить код подтверждения в базе данных или кэше для дальнейшей проверки
-            user.verification_code = verification_code
-            user.save()
 
             return Response({'detail': 'Verification code sent'}, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         # Создать объект пользователя и вернуть его
         return serializer.save()
-
-

@@ -61,11 +61,12 @@ class LoginOrRegisterView(TokenObtainPairView):
             # Если номер телефона не подтвержден, отправляем код подтверждения
             verification_code = random.randint(100000, 999999)
             sms_text = f'От Bilimzet ваш код верификации: {verification_code}'
+            user.verification_code = verification_code
+            user.save()
             send_sms(user.phone_number, sms_text)
 
             # Сохранение кода подтверждения в базе данных
-            user.verification_code = verification_code
-            user.save()
+
 
             return Response({'detail': 'Phone number not verified. Verification code sent'},
                             status=status.HTTP_400_BAD_REQUEST)
