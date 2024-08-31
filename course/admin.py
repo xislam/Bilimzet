@@ -1,67 +1,57 @@
 from django.contrib import admin
 
-from course.models import Question, Exam, Review, Instructor, Module, Course, Answer, UserExamResult, UserAnswer
-
-
-class ModuleInline(admin.TabularInline):  # Используем TabularInline для компактного отображения
-    model = Module
-    extra = 1  # Показывает одну пустую строку для добавления нового модуля
-
-
-class ReviewInline(admin.TabularInline):
-    model = Review
-    extra = 1
-
-
-class QuestionInline(admin.TabularInline):
-    model = Question
-    extra = 1
+from course.models import Question, Exam, Review, Instructor, Module, Course, Answer, UserExamResult, UserAnswer, \
+    Purchase, UserProgress
 
 
 class AnswerInline(admin.TabularInline):
-    model = Answer
+    model = UserAnswer
     fields = ['answer', 'is_correct']
     extra = 1
 
 
-class ExamAdmin(admin.ModelAdmin):
-    inlines = [QuestionInline]
+class UserExamResultInline(admin.TabularInline):
+    model = UserAnswer
+    fields = ['answer', 'is_correct']
+    extra = 1
+    show_change_link = True
 
 
-class QuestionAdmin(admin.ModelAdmin):
-    inlines = [AnswerInline]
+class ExamInline(admin.StackedInline):
+    model = Exam
+    extra = 1
 
 
-@admin.register(Course)
+class ModuleInline(admin.TabularInline):
+    model = Module
+    extra = 1
+
+
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['title', 'description', 'instructor', 'review_count', 'module_count']
     search_fields = ['title', 'description']
-    inlines = [ModuleInline, ReviewInline]
+    inlines = [ModuleInline, ExamInline]
 
 
-@admin.register(Instructor)
 class InstructorAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'phone_number', 'email']
     search_fields = ['first_name', 'last_name', 'email']
 
 
-# Регистрация моделей с правильным отображением связанных объектов
-admin.site.register(Module)
-admin.site.register(Review)
-admin.site.register(Exam, ExamAdmin)
-admin.site.register(Question, QuestionAdmin)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ['course', 'user', 'rating', 'comment']
+    search_fields = ['course__title', 'user__username']
 
 
-# Register your models here.
+class UserProgressAdmin(admin.ModelAdmin):
+    list_display = ['user', 'course', 'progress_percentage']
+    search_fields = ['user__username', 'course__title']
+
 
 class UserExamResultAdmin(admin.ModelAdmin):
     list_display = ['user', 'exam', 'score', 'total_questions', 'correct_answers', 'incorrect_answers']
     search_fields = ['user__username', 'exam__title']
-    inlines = [AnswerInline]
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('user', 'exam')
+    inlines = [UserExamResultInline]
 
 
 class UserAnswerAdmin(admin.ModelAdmin):
@@ -69,5 +59,14 @@ class UserAnswerAdmin(admin.ModelAdmin):
     search_fields = ['user_exam_result__user__username', 'answer__text']
 
 
+admin.site.register(Instructor, InstructorAdmin)
+admin.site.register(Review, ReviewAdmin)
+admin.site.register(Course, CourseAdmin)
+admin.site.register(Module)
+admin.site.register(Purchase)
+admin.site.register(UserProgress, UserProgressAdmin)
+admin.site.register(Exam)
+admin.site.register(Question)
+admin.site.register(Answer)
 admin.site.register(UserExamResult, UserExamResultAdmin)
 admin.site.register(UserAnswer, UserAnswerAdmin)
