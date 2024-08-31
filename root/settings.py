@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'user',
     'drf_yasg',
+    'course'
 ]
 
 MIDDLEWARE = [
