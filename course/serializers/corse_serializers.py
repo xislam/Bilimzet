@@ -56,8 +56,15 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     instructor = InstructorSerializer()
     reviews = ReviewSerializer(many=True, read_only=True)
     modules = ModuleSerializer(many=True, read_only=True)
+    exam_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
-                  'modules']
+                  'modules', 'exam_id']
+
+    def get_exam_id(self, obj):
+        # Return the exam ID if the course has an associated exam
+        if obj.exam:
+            return obj.exam.id
+        return None
