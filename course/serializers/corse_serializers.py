@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from course.models import Course, Module, Review, Instructor
+from course.models import Course, Module, Review, Instructor, UserProgress
 
 
 class InstructorSerializer(serializers.ModelSerializer):
@@ -25,10 +25,29 @@ class CourseListSerializer(serializers.ModelSerializer):
     review_count = serializers.IntegerField(read_only=True)
     module_count = serializers.IntegerField(read_only=True)
     instructor = InstructorSerializer()
+    user_progress = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'review_count', 'module_count', 'instructor']
+        fields = ['id', 'title', 'description', 'review_count', 'module_count', 'instructor', 'user_progress']
+
+    def get_user_progress(self, obj):
+        # Получаем текущего пользователя из контекста запроса
+        user = self.context['request'].user
+
+        # Проверяем, есть ли у пользователя прогресс по данному курсу
+        try:
+            progress = UserProgress.objects.get(user=user, course=obj)
+            return {
+                'completed_modules': progress.completed_modules.count(),
+                'progress_percentage': progress.progress_percentage
+            }
+        except UserProgress.DoesNotExist:
+            # Если прогресса нет, возвращаем 0
+            return {
+                'completed_modules': 0,
+                'progress_percentage': 0.0
+            }
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
