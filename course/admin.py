@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from course.models import Question, Exam, Review, Instructor, Module, Course, Answer
+from course.models import Question, Exam, Review, Instructor, Module, Course, Answer, UserExamResult, UserAnswer
 
 
 class ModuleInline(admin.TabularInline):  # Используем TabularInline для компактного отображения
@@ -20,6 +20,7 @@ class QuestionInline(admin.TabularInline):
 
 class AnswerInline(admin.TabularInline):
     model = Answer
+    fields = ['answer', 'is_correct']
     extra = 1
 
 
@@ -49,4 +50,24 @@ admin.site.register(Module)
 admin.site.register(Review)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Question, QuestionAdmin)
+
+
 # Register your models here.
+
+class UserExamResultAdmin(admin.ModelAdmin):
+    list_display = ['user', 'exam', 'score', 'total_questions', 'correct_answers', 'incorrect_answers']
+    search_fields = ['user__username', 'exam__title']
+    inlines = [AnswerInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('user', 'exam')
+
+
+class UserAnswerAdmin(admin.ModelAdmin):
+    list_display = ['user_exam_result', 'answer', 'is_correct']
+    search_fields = ['user_exam_result__user__username', 'answer__text']
+
+
+admin.site.register(UserExamResult, UserExamResultAdmin)
+admin.site.register(UserAnswer, UserAnswerAdmin)
