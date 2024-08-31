@@ -29,7 +29,7 @@ class CourseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'review_count', 'module_count', 'instructor', 'user_progress']
+        fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'user_progress']
 
     def get_user_progress(self, obj):
         # Получаем текущего пользователя из контекста запроса
@@ -59,4 +59,5 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews', 'modules']
+        fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
+                  'modules']

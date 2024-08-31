@@ -141,3 +141,41 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class UserExamResult(models.Model):
+    user = models.ForeignKey(User, related_name='exam_results', on_delete=models.CASCADE, verbose_name="Пользователь")
+    exam = models.ForeignKey(Exam, related_name='user_results', on_delete=models.CASCADE, verbose_name="Экзамен")
+    answers = models.ManyToManyField(Answer, through='UserAnswer', verbose_name="Ответы пользователя")
+    score = models.FloatField(default=0.0, verbose_name="Оценка")
+    total_questions = models.IntegerField(default=0, verbose_name="Всего вопросов")
+    correct_answers = models.IntegerField(default=0, verbose_name="Правильные ответы")
+    incorrect_answers = models.IntegerField(default=0, verbose_name="Неправильные ответы")
+
+    class Meta:
+        verbose_name = "Результат экзамена пользователя"
+        verbose_name_plural = "Результаты экзаменов пользователей"
+
+    def calculate_score(self):
+        if self.total_questions > 0:
+            self.score = (self.correct_answers / self.total_questions) * 100
+        else:
+            self.score = 0.0
+        self.save()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.exam.title} - {self.score}%"
+
+
+class UserAnswer(models.Model):
+    user_exam_result = models.ForeignKey(UserExamResult, related_name='user_answers', on_delete=models.CASCADE,
+                                         verbose_name="Результат экзамена пользователя")
+    answer = models.ForeignKey(Answer, related_name='user_answers', on_delete=models.CASCADE, verbose_name="Ответ")
+    is_correct = models.BooleanField(default=False, verbose_name="Правильный ответ")
+
+    class Meta:
+        verbose_name = "Ответ пользователя"
+        verbose_name_plural = "Ответы пользователей"
+
+    def __str__(self):
+        return f"{self.user_exam_result.user.username} - {self.answer.text} - {'Correct' if self.is_correct else 'Incorrect'}"
