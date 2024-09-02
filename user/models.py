@@ -52,3 +52,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+class VerificationCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification_code')
+    code = models.CharField(max_length=6)
+    verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Verification code for {self.user.phone_number}"

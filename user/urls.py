@@ -6,7 +6,8 @@ from user.api.api_profile import UserProfileUpdateView, UserProfileDetailView, U
     UserPasswordUpdateView
 from user.api.api_register import RegistrationView
 from user.api.api_request_password_reset import RequestPasswordResetView
-from user.api.api_verification_number import PhoneNumberVerificationView, PhoneNumberCheckView
+from user.api.api_verification_number import PhoneNumberVerificationView, PhoneNumberCheckView, \
+    RequestVerificationCodeView, TokenObtainView, PasswordUpdateView
 
 urlpatterns = [
     path('register/', RegistrationView.as_view(), name='register'),
@@ -19,5 +20,8 @@ urlpatterns = [
     path('request-password-reset/', RequestPasswordResetView.as_view(), name='request-password-reset'),
     path('password-reset/', PasswordResetView.as_view(), name='password-reset'),
     path('user/update-password/', UserPasswordUpdateView.as_view(), name='user-update-password'),
+    path('auth/request-verification/', RequestVerificationCodeView.as_view(), name='request-verification'),
+    path('auth/token/', TokenObtainView.as_view(), name='token-obtain'),
+    path('auth/update-password/', PasswordUpdateView.as_view(), name='update-password'),
 
 ]

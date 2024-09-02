@@ -178,4 +178,4 @@ class UserAnswer(models.Model):
         verbose_name_plural = "Ответы пользователей"
 
     def __str__(self):
-        return f"{self.user_exam_result.user.username} - {self.answer.text} - {'Correct' if self.is_correct else 'Incorrect'}"
+        return f"{self.user_exam_result.user.name} - {self.answer.text} - {'Correct' if self.is_correct else 'Incorrect'}"
