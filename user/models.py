@@ -55,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class VerificationCode(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification_code')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='code')
     code = models.CharField(max_length=6)
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
