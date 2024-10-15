@@ -40,10 +40,18 @@ class CourseListSerializer(serializers.ModelSerializer):
                   'duration']
 
     def get_user_progress(self, obj):
-        # Получаем текущего пользователя из контекста запроса
-        user = self.context['request'].user
+        # Проверяем, есть ли пользователь в контексте сериализатора и является ли он аутентифицированным
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+        else:
+            # Если пользователь не аутентифицирован, возвращаем 0 прогресса
+            return {
+                'completed_modules': 0,
+                'progress_percentage': 0.0
+            }
 
-        # Проверяем, есть ли у пользователя прогресс по данному курсу
+        # Если пользователь аутентифицирован, пытаемся получить его прогресс
         try:
             progress = UserProgress.objects.get(user=user, course=obj)
             return {
