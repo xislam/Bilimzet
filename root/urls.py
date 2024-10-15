@@ -38,6 +38,7 @@ urlpatterns = [
 
                   path('admin/', admin.site.urls),
                   path('api_user/', include('user.urls')),
+                  path('api_news/', include('news.urls')),
                   path('api_course/', include('course.urls')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

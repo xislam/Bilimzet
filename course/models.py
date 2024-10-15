@@ -71,9 +71,23 @@ class Module(models.Model):
 
 
 class Purchase(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Ожидает оплаты'),
+        ('completed', 'Оплачено'),
+        ('failed', 'Не удалось'),
+        ('refunded', 'Возвращено'),
+    ]
+    PAYMENT_METHOD_CHOICES = [
+        ('kaspi', 'Kaspi'),
+        ('freedom_pay', 'Freedom Pay'),
+    ]
     user = models.ForeignKey(User, related_name='purchases', on_delete=models.CASCADE, verbose_name="Пользователь")
     course = models.ForeignKey(Course, related_name='purchases', on_delete=models.CASCADE, verbose_name="Курс")
     purchased_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата покупки")
+    kaspi = models.CharField(verbose_name='Номер каспи', max_length=14)
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='pending',
+                                      verbose_name='Статус оплаты')
+    payment_method = models.CharField(max_length=15, choices=PAYMENT_METHOD_CHOICES, verbose_name='Способ оплаты')
 
     class Meta:
         verbose_name = "Покупка"
