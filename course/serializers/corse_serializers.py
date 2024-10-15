@@ -66,10 +66,9 @@ class CourseListSerializer(serializers.ModelSerializer):
             }
 
     def get_duration(self, obj):
-        # Получаем объект Duration, связанный с курсом
-        duration_instance = Duration.objects.filter(course=obj).first()
-        if duration_instance:
-            return DurationSerializer(duration_instance).data
+        duration_instances = Duration.objects.filter(course=obj)
+        if duration_instances:
+            return DurationSerializer(duration_instances, many=True).data
         return None
 
 
