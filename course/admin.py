@@ -70,3 +70,6 @@ admin.site.register(Question)
 admin.site.register(Answer)
 admin.site.register(UserExamResult, UserExamResultAdmin)
 admin.site.register(UserAnswer, UserAnswerAdmin)
+
+
+admin.site.register(Purchase)
