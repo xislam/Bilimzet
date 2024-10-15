@@ -32,7 +32,7 @@ class CourseListSerializer(serializers.ModelSerializer):
     module_count = serializers.IntegerField(read_only=True)
     instructor = InstructorSerializer()
     user_progress = serializers.SerializerMethodField()
-    duration = DurationSerializer()
+    duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -64,6 +64,13 @@ class CourseListSerializer(serializers.ModelSerializer):
                 'completed_modules': 0,
                 'progress_percentage': 0.0
             }
+
+    def get_duration(self, obj):
+        # Получаем объект Duration, связанный с курсом
+        duration_instance = Duration.objects.filter(course=obj).first()
+        if duration_instance:
+            return DurationSerializer(duration_instance).data
+        return None
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
