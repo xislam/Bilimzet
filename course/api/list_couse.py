@@ -6,7 +6,7 @@ from course.serializers.corse_serializers import CourseListSerializer, CourseDet
 
 class CourseListView(generics.ListAPIView):
     queryset = Course.objects.all()
-    serializer_class = CourseListSerializer
+    serializer_class = CourseDetailSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

@@ -78,13 +78,14 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     instructor = InstructorSerializer()
     reviews = ReviewSerializer(many=True, read_only=True)
     modules = ModuleSerializer(many=True, read_only=True)
+    user_progress = serializers.SerializerMethodField()
     exam_id = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
-                  'modules', 'exam_id', 'duration']
+                  'modules', 'exam_id', 'user_progress', 'duration']
 
     def get_exam_id(self, obj):
         # Return the exam ID if the course has an associated exam
@@ -97,3 +98,29 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         if duration_instances:
             return DurationSerializer(duration_instances, many=True).data
         return None
+
+    def get_user_progress(self, obj):
+        # Проверяем, есть ли пользователь в контексте сериализатора и является ли он аутентифицированным
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+        else:
+            # Если пользователь не аутентифицирован, возвращаем 0 прогресса
+            return {
+                'completed_modules': 0,
+                'progress_percentage': 0.0
+            }
+
+        # Если пользователь аутентифицирован, пытаемся получить его прогресс
+        try:
+            progress = UserProgress.objects.get(user=user, course=obj)
+            return {
+                'completed_modules': progress.completed_modules.count(),
+                'progress_percentage': progress.progress_percentage
+            }
+        except UserProgress.DoesNotExist:
+            # Если прогресса нет, возвращаем 0
+            return {
+                'completed_modules': 0,
+                'progress_percentage': 0.0
+            }
