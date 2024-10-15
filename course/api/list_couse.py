@@ -9,8 +9,11 @@ class CourseListView(generics.ListAPIView):
     serializer_class = CourseListSerializer
 
     def get_serializer_context(self):
-        # Передаем контекст запроса в сериализатор
-        return {'request': self.request}
+        context = super().get_serializer_context()
+        # Проверяем, есть ли запрос и пользователь в контексте запроса
+        if self.request and hasattr(self.request, 'user'):
+            context['request'] = self.request
+        return context
 
 
 class CourseDetailView(generics.RetrieveAPIView):
