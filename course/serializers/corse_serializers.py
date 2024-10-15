@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from course.models import Course, Module, Review, Instructor, UserProgress
+from course.models import Course, Module, Review, Instructor, UserProgress, Duration
 
 
 class InstructorSerializer(serializers.ModelSerializer):
@@ -21,15 +21,23 @@ class ModuleSerializer(serializers.ModelSerializer):
         fields = ['title', 'description', 'video_url', 'pdf_document']
 
 
+class DurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Duration
+        fields = '__all__'
+
+
 class CourseListSerializer(serializers.ModelSerializer):
     review_count = serializers.IntegerField(read_only=True)
     module_count = serializers.IntegerField(read_only=True)
     instructor = InstructorSerializer()
     user_progress = serializers.SerializerMethodField()
+    duration = DurationSerializer()
 
     class Meta:
         model = Course
-        fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'user_progress']
+        fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'user_progress',
+                  'duration']
 
     def get_user_progress(self, obj):
         # Получаем текущего пользователя из контекста запроса

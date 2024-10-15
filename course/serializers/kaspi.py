@@ -6,4 +6,4 @@ from course.models import Purchase
 class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
-        fields = ['course', 'kaspi', 'payment_status', 'payment_method']
+        fields = ['course', 'kaspi', 'payment_status', 'payment_method', 'duration']

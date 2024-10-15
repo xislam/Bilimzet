@@ -29,7 +29,7 @@ class Review(models.Model):
         verbose_name_plural = "Отзывы"
 
     def __str__(self):
-        return f"Отзыв от {self.user.username} на {self.course.title}"
+        return f"Отзыв от {self.user.name} на {self.course.title}"
 
 
 class Course(models.Model):
@@ -53,6 +53,19 @@ class Course(models.Model):
     @property
     def module_count(self):
         return self.modules.count()
+
+
+class Duration(models.Model):
+    course = models.ForeignKey(Course, verbose_name='Курс', on_delete=models.CASCADE)
+    number_hours = models.IntegerField(verbose_name='Количество часов', default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
+
+    def __str__(self):
+        return f"{self.course} {self.number_hours} {self.price}"
+
+    class Meta:
+        verbose_name = 'Продолжительности'
+        verbose_name_plural = verbose_name
 
 
 class Module(models.Model):
@@ -83,6 +96,7 @@ class Purchase(models.Model):
     ]
     user = models.ForeignKey(User, related_name='purchases', on_delete=models.CASCADE, verbose_name="Пользователь")
     course = models.ForeignKey(Course, related_name='purchases', on_delete=models.CASCADE, verbose_name="Курс")
+    duration = models.ForeignKey(Duration, related_name='purchases', on_delete=models.CASCADE)
     purchased_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата покупки")
     kaspi = models.CharField(verbose_name='Номер каспи', max_length=14)
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='pending',
@@ -94,7 +108,7 @@ class Purchase(models.Model):
         verbose_name_plural = "Покупки"
 
     def __str__(self):
-        return f"{self.user.username} - {self.course.title}"
+        return f"{self.user.name} - {self.course.title}"
 
 
 class UserProgress(models.Model):
@@ -117,7 +131,7 @@ class UserProgress(models.Model):
         self.save()
 
     def __str__(self):
-        return f"{self.user.username} - {self.course.title} - {self.progress_percentage}%"
+        return f"{self.user.name} - {self.course.title} - {self.progress_percentage}%"
 
 
 class Exam(models.Model):
