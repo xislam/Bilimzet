@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from course.models import Course, Module, Review, Instructor, UserProgress, Duration
+from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase
 
 
 class InstructorSerializer(serializers.ModelSerializer):
@@ -81,11 +81,15 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     user_progress = serializers.SerializerMethodField()
     exam_id = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
+    purchase_details = serializers.SerializerMethodField()  # Информация о продолжительности курса, если куплен
 
     class Meta:
         model = Course
-        fields = ['id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
-                  'modules', 'exam_id', 'user_progress', 'duration']
+        fields = [
+            'id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
+            'modules', 'exam_id', 'user_progress', 'duration', 'is_purchased', 'purchase_details'
+        ]
 
     def get_exam_id(self, obj):
         # Return the exam ID if the course has an associated exam
@@ -124,3 +128,26 @@ class CourseDetailSerializer(serializers.ModelSerializer):
                 'completed_modules': 0,
                 'progress_percentage': 0.0
             }
+
+    def get_is_purchased(self, obj):
+        # Проверяем, куплен ли курс пользователем
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+            purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
+            return purchase is not None
+        return False
+
+    def get_purchase_details(self, obj):
+        # Возвращает подробности о покупке курса, если он был куплен
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+            purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
+            if purchase:
+                return {
+                    'purchase_at': purchase.purchased_at,
+                    'duration': DurationSerializer(purchase.duration).data,
+                    'payment_method': purchase.payment_method,
+                }
+        return None
