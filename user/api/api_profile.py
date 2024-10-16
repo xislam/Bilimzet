@@ -73,7 +73,5 @@ class UserPasswordUpdateView(generics.UpdateAPIView):
 
         # Optionally, invalidate the user's JWT tokens
         # You can also log the user out by removing their refresh token if needed
-        refresh = RefreshToken.for_user(user)
-        refresh.blacklist()
 
         return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
