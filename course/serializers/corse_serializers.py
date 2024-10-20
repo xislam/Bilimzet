@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase
+from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category
 
 
 class InstructorSerializer(serializers.ModelSerializer):
@@ -12,7 +12,8 @@ class InstructorSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['user', 'rating', 'comment']
+        fields = ['id', 'course', 'user', 'rating', 'comment']
+        read_only_fields = ['user']
 
 
 class ModuleSerializer(serializers.ModelSerializer):
@@ -87,7 +88,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = [
-            'id', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
+            'id', 'category', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
             'modules', 'exam_id', 'user_progress', 'duration', 'is_purchased', 'purchase_details'
         ]
 
@@ -151,3 +152,15 @@ class CourseDetailSerializer(serializers.ModelSerializer):
                     'payment_method': purchase.payment_method,
                 }
         return None
+
+
+class CoursePromotionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'title', 'description', 'img', 'instructor', 'language', 'has_promotion', 'discount_percentage']
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name']

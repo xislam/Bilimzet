@@ -22,7 +22,7 @@ class ExamDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ['id', 'title', 'questions']
+        fields = ['id', 'title', 'questions', 'duration', 'correct_answers_required']
 
     def get_questions(self, obj):
         questions = obj.questions.all()

@@ -32,12 +32,31 @@ class Review(models.Model):
         return f"Отзыв от {self.user.name} на {self.course.title}"
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Название категории")
+
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+
+    def __str__(self):
+        return self.name
+
+
 class Course(models.Model):
+    LANGUAGE_CHOICES = [
+        ('ru', 'Русский'),
+        ('kz', 'Казахский'),
+    ]
+    category = models.ForeignKey(Category, related_name='courses', on_delete=models.CASCADE, verbose_name="Категория")
     title = models.CharField(max_length=255, verbose_name="Название курса")
     description = models.TextField(verbose_name="Описание курса")
     img = models.ImageField(upload_to='course_img', verbose_name='Фото курса')
     instructor = models.ForeignKey(Instructor, related_name='courses', on_delete=models.SET_NULL, null=True,
                                    verbose_name="Преподаватель")
+    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, verbose_name="Язык курса")
+    has_promotion = models.BooleanField(default=False, verbose_name="Акция применима")
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Процент скидки")
 
     class Meta:
         verbose_name = "Курс"
@@ -103,6 +122,7 @@ class Purchase(models.Model):
                                       verbose_name='Статус оплаты')
     payment_method = models.CharField(max_length=15, choices=PAYMENT_METHOD_CHOICES, verbose_name='Способ оплаты')
 
+    # Новые поля для акции
     class Meta:
         verbose_name = "Покупка"
         verbose_name_plural = "Покупки"
@@ -136,7 +156,10 @@ class UserProgress(models.Model):
 
 class Exam(models.Model):
     course = models.OneToOneField(Course, related_name='exam', on_delete=models.CASCADE, verbose_name="Курс")
+    duration = models.ForeignKey(Duration, on_delete=models.CASCADE, verbose_name="Продолжительности курса")
     title = models.CharField(max_length=255, verbose_name="Название экзамена")
+    correct_answers_required = models.IntegerField(
+        verbose_name="Количество правильных ответов для получения сертификата")
 
     class Meta:
         verbose_name = "Экзамен"

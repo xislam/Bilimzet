@@ -24,7 +24,7 @@ class RequestPasswordResetView(generics.GenericAPIView):
         if user:
             # Отправить SMS-код подтверждения пользователю
             verification_code = str(random.randint(100000, 999999))
-            sms_text = f'От 8Telecom ваш код верификации: {verification_code}'
+            sms_text = f'От Bilimzet ваш код верификации: {verification_code}'
             send_sms(phone_number, sms_text)
 
             # Сохранить код подтверждения в базе данных или кэше для дальнейшей проверки
