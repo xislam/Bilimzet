@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from course.models import Question, Exam, Review, Instructor, Module, Course, Answer, UserExamResult, UserAnswer, \
-    Purchase, UserProgress, Duration
+    Purchase, UserProgress, Duration, Category
 
 
 class AnswerInline(admin.TabularInline):
@@ -73,3 +73,4 @@ admin.site.register(UserAnswer, UserAnswerAdmin)
 
 
 admin.site.register(Duration)
+admin.site.register(Category)

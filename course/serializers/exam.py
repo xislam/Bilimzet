@@ -45,19 +45,20 @@ class UserExamResultSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         answers_data = validated_data.pop('answers')
         user_exam_result = UserExamResult.objects.create(**validated_data)
-        total_questions = 0
+
+        total_questions = len(answers_data)
         correct_answers = 0
         incorrect_answers = 0
 
         for answer_data in answers_data:
-            answer = answer_data['answer']
-            is_correct = answer_data['is_correct']
+            answer = Answer.objects.get(id=answer_data['id'])
+            is_correct = answer.is_correct
             UserAnswer.objects.create(user_exam_result=user_exam_result, answer=answer, is_correct=is_correct)
+
             if is_correct:
                 correct_answers += 1
             else:
                 incorrect_answers += 1
-            total_questions += 1
 
         user_exam_result.total_questions = total_questions
         user_exam_result.correct_answers = correct_answers
