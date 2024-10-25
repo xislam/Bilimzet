@@ -22,6 +22,11 @@ class ExamInline(admin.StackedInline):
     extra = 1
 
 
+class DurationInline(admin.StackedInline):
+    model = Duration
+    extra = 1
+
+
 class ModuleInline(admin.TabularInline):
     model = Module
     extra = 1
@@ -30,7 +35,7 @@ class ModuleInline(admin.TabularInline):
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['title', 'description', 'instructor', 'review_count', 'module_count']
     search_fields = ['title', 'description']
-    inlines = [ModuleInline, ExamInline]
+    inlines = [ModuleInline, ExamInline, DurationInline]
 
 
 class InstructorAdmin(admin.ModelAdmin):
@@ -70,7 +75,6 @@ admin.site.register(Question)
 admin.site.register(Answer)
 admin.site.register(UserExamResult, UserExamResultAdmin)
 admin.site.register(UserAnswer, UserAnswerAdmin)
-
 
 admin.site.register(Duration)
 admin.site.register(Category)
