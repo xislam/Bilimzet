@@ -4,77 +4,95 @@ from course.models import Question, Exam, Review, Instructor, Module, Course, An
     Purchase, UserProgress, Duration, Category
 
 
-class AnswerInline(admin.TabularInline):
-    model = UserAnswer
-    fields = ['answer', 'is_correct']
-    extra = 1
-
-
-class UserExamResultInline(admin.TabularInline):
-    model = UserAnswer
-    fields = ['answer', 'is_correct']
-    extra = 1
-    show_change_link = True
-
-
-class ExamInline(admin.StackedInline):
-    model = Exam
-    extra = 1
-
-
-class DurationInline(admin.StackedInline):
-    model = Duration
-    extra = 1
+class ReviewInline(admin.TabularInline):
+    model = Review
+    extra = 1  # Количество пустых форм для добавления новых отзывов
 
 
 class ModuleInline(admin.TabularInline):
     model = Module
-    extra = 1
+    extra = 1  # Количество пустых форм для добавления новых модулей
 
 
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'description', 'instructor', 'review_count', 'module_count']
-    search_fields = ['title', 'description']
-    inlines = [ModuleInline, ExamInline, DurationInline]
+class AnswerInline(admin.StackedInline):
+    model = Answer
+    extra = 1  # Количество пустых форм для добавления новых ответов
 
 
+class QuestionInline(admin.StackedInline):
+    model = Question
+    extra = 1  # Количество пустых форм для добавления новых вопросов
+    inlines = [AnswerInline]
+
+
+@admin.register(Instructor)
 class InstructorAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'phone_number', 'email']
-    search_fields = ['first_name', 'last_name', 'email']
+    list_display = ('first_name', 'last_name', 'phone_number', 'email')
+    search_fields = ('first_name', 'last_name', 'email')
 
 
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'instructor', 'category', 'language', 'has_promotion', 'discount_percentage')
+    search_fields = ('title',)
+    list_filter = ('category', 'instructor', 'language', 'has_promotion')
+    inlines = [ReviewInline]  # Добавляем Inline для отзывов
+
+
+@admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['course', 'user', 'rating', 'comment']
-    search_fields = ['course__title', 'user__username']
+    list_display = ('user', 'course', 'rating', 'comment')
+    search_fields = ('user__username', 'course__title')
 
 
+@admin.register(Duration)
+class DurationAdmin(admin.ModelAdmin):
+    list_display = ('course', 'number_hours', 'price')
+    search_fields = ('course__title',)
+    inlines = [ModuleInline]  # Вложенные модули
+
+
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'duration', 'video_url', 'pdf_document')
+    search_fields = ('title', 'duration__course__title')
+
+
+@admin.register(Purchase)
+class PurchaseAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'duration', 'purchased_at', 'payment_status', 'payment_method')
+    search_fields = ('user__username', 'course__title')
+    list_filter = ('payment_status', 'payment_method', 'purchased_at')
+
+
+@admin.register(UserProgress)
 class UserProgressAdmin(admin.ModelAdmin):
-    list_display = ['user', 'course', 'progress_percentage']
-    search_fields = ['user__username', 'course__title']
+    list_display = ('user', 'course', 'duration', 'progress_percentage')
+    search_fields = ('user__username', 'course__title')
+    list_filter = ('duration',)
 
 
-class UserExamResultAdmin(admin.ModelAdmin):
-    list_display = ['user', 'exam', 'score', 'total_questions', 'correct_answers', 'incorrect_answers']
-    search_fields = ['user__username', 'exam__title']
-    inlines = [UserExamResultInline]
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('text', 'exam')
+    search_fields = ('text', 'exam__title')
+    inlines = [AnswerInline]  # Вложенные ответы
 
 
-class UserAnswerAdmin(admin.ModelAdmin):
-    list_display = ['user_exam_result', 'answer', 'is_correct']
-    search_fields = ['user_exam_result__user__username', 'answer__text']
+@admin.register(Exam)
+class ExamAdmin(admin.ModelAdmin):
+    list_display = ('title', 'duration', 'correct_answers_required')
+    search_fields = ('title',)
+    inlines = [QuestionInline]  # Вложенные вопросы
 
 
-admin.site.register(Instructor, InstructorAdmin)
-admin.site.register(Review, ReviewAdmin)
-admin.site.register(Course, CourseAdmin)
-admin.site.register(Module)
-admin.site.register(Purchase)
-admin.site.register(UserProgress, UserProgressAdmin)
-admin.site.register(Exam)
-admin.site.register(Question)
-admin.site.register(Answer)
-admin.site.register(UserExamResult, UserExamResultAdmin)
-admin.site.register(UserAnswer, UserAnswerAdmin)
-
-admin.site.register(Duration)
-admin.site.register(Category)
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+    list_display = ('text', 'question', 'is_correct')
+    search_fields = ('text', 'question__text')

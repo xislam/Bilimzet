@@ -69,10 +69,6 @@ class Course(models.Model):
     def review_count(self):
         return self.reviews.count()
 
-    @property
-    def module_count(self):
-        return self.modules.count()
-
 
 class Duration(models.Model):
     course = models.ForeignKey(Course, verbose_name='Курс', on_delete=models.CASCADE)
@@ -88,7 +84,8 @@ class Duration(models.Model):
 
 
 class Module(models.Model):
-    course = models.ForeignKey(Course, related_name='modules', on_delete=models.CASCADE, verbose_name="Курс")
+    duration = models.ForeignKey(Duration, related_name='modules', on_delete=models.CASCADE,
+                                 verbose_name="Продолжительность")
     title = models.CharField(max_length=255, verbose_name="Название модуля")
     description = models.TextField(verbose_name="Описание модуля")
     video_url = models.URLField(blank=True, null=True, verbose_name="URL видео")
@@ -133,6 +130,8 @@ class Purchase(models.Model):
 
 class UserProgress(models.Model):
     user = models.ForeignKey(User, related_name='progress', on_delete=models.CASCADE, verbose_name="Пользователь")
+    duration = models.ForeignKey(Duration, related_name='progress', on_delete=models.CASCADE,
+                                 verbose_name="Продолжительность")
     course = models.ForeignKey(Course, related_name='progress', on_delete=models.CASCADE, verbose_name="Курс")
     completed_modules = models.ManyToManyField(Module, blank=True, verbose_name="Пройденные модули")
     progress_percentage = models.FloatField(default=0.0, verbose_name="Прогресс в процентах")
@@ -142,7 +141,7 @@ class UserProgress(models.Model):
         verbose_name_plural = "Прогрессы пользователей"
 
     def update_progress(self):
-        total_modules = self.course.modules.count()
+        total_modules = self.duration.modules.count()  # Изменено на duration
         completed_modules = self.completed_modules.count()
         if total_modules > 0:
             self.progress_percentage = (completed_modules / total_modules) * 100
@@ -151,11 +150,10 @@ class UserProgress(models.Model):
         self.save()
 
     def __str__(self):
-        return f"{self.user.name} - {self.course.title} - {self.progress_percentage}%"
+        return f"{self.user.name} - {self.course.title} (Продолжительность: {self.duration.number_hours} часов) - {self.progress_percentage}%"
 
 
 class Exam(models.Model):
-    course = models.OneToOneField(Course, related_name='exam', on_delete=models.CASCADE, verbose_name="Курс")
     duration = models.ForeignKey(Duration, on_delete=models.CASCADE, verbose_name="Продолжительности курса")
     title = models.CharField(max_length=255, verbose_name="Название экзамена")
     correct_answers_required = models.IntegerField(
@@ -166,7 +164,7 @@ class Exam(models.Model):
         verbose_name_plural = "Экзамены"
 
     def __str__(self):
-        return f"Экзамен для курса: {self.course.title}"
+        return f"Экзамен для курса: {self.duration.course.title}"
 
 
 class Question(models.Model):

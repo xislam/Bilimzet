@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category
+from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category, Exam
+from course.serializers.exam import ExamDetailSerializer
 
 
 class InstructorSerializer(serializers.ModelSerializer):
@@ -23,9 +24,15 @@ class ModuleSerializer(serializers.ModelSerializer):
 
 
 class DurationSerializer(serializers.ModelSerializer):
+    modules = ModuleSerializer(many=True, read_only=True)
+    exam_ids = serializers.SerializerMethodField()
+
     class Meta:
         model = Duration
         fields = '__all__'
+
+    def get_exam_ids(self, obj):
+        return [exam.id for exam in obj.exam_set.all()]
 
 
 class CourseListSerializer(serializers.ModelSerializer):
@@ -78,9 +85,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     module_count = serializers.IntegerField(read_only=True)
     instructor = InstructorSerializer()
     reviews = ReviewSerializer(many=True, read_only=True)
-    modules = ModuleSerializer(many=True, read_only=True)
     user_progress = serializers.SerializerMethodField()
-    exam_id = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
     purchase_details = serializers.SerializerMethodField()  # Информация о продолжительности курса, если куплен
@@ -89,14 +94,8 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         model = Course
         fields = [
             'id', 'category', 'img', 'title', 'description', 'review_count', 'module_count', 'instructor', 'reviews',
-            'modules', 'exam_id', 'user_progress', 'duration', 'is_purchased', 'purchase_details'
+            'user_progress', 'duration', 'is_purchased', 'purchase_details'
         ]
-
-    def get_exam_id(self, obj):
-        # Return the exam ID if the course has an associated exam
-        if obj.exam:
-            return obj.exam.id
-        return None
 
     def get_duration(self, obj):
         duration_instances = Duration.objects.filter(course=obj)
