@@ -76,7 +76,7 @@ class Duration(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
 
     def __str__(self):
-        return f"{self.course} {self.number_hours} {self.price}"
+        return f"{self.course}, {self.number_hours}, {self.price}"
 
     class Meta:
         verbose_name = 'Продолжительности'
@@ -224,10 +224,10 @@ class TestResult(models.Model):
 
 
 class Certificate(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name="Экзамен")
     issued_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='certificates/', null=True, blank=True)
+    file = models.FileField(upload_to='certificates', null=True, blank=True)
 
     class Meta:
         verbose_name = "Сертификат"

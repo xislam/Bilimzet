@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from course.models import Question, Exam, Review, Instructor, Module, Course, Answer,\
-    Purchase, UserProgress, Duration, Category
+from course.models import Question, Exam, Review, Instructor, Module, Course, Answer, \
+    Purchase, UserProgress, Duration, Category, Certificate
 
 
 class ReviewInline(admin.TabularInline):
@@ -96,3 +96,9 @@ class ExamAdmin(admin.ModelAdmin):
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ('text', 'question', 'is_correct')
     search_fields = ('text', 'question__text')
+
+
+@admin.register(Certificate)
+class CertificateAdmin(admin.ModelAdmin):
+    list_display = ('user', 'exam', 'file')
+    search_fields = ('user',)
