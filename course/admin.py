@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from course.models import Question, Exam, Review, Instructor, Module, Course, Answer, UserExamResult, UserAnswer, \
+from course.models import Question, Exam, Review, Instructor, Module, Course, Answer,\
     Purchase, UserProgress, Duration, Category
 
 

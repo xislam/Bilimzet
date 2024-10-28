@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category, Exam
-from course.serializers.exam import ExamDetailSerializer
 
 
 class InstructorSerializer(serializers.ModelSerializer):

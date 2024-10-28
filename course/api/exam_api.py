@@ -1,31 +1,61 @@
-from rest_framework import permissions, generics, serializers
+from rest_framework import status, viewsets
+from rest_framework.response import Response
 
-from course.models import Exam
-from course.serializers.exam import UserExamResultSerializer, QuestionSerializer
-
-
-class ExamDetailView(generics.RetrieveAPIView):
-    queryset = Exam.objects.all()
-    serializer_class = serializers.ModelSerializer
-
-    def get_serializer_class(self):
-        class ExamDetailSerializer(serializers.ModelSerializer):
-            questions = serializers.SerializerMethodField()
-
-            class Meta:
-                model = Exam
-                fields = ['id', 'title', 'questions']
-
-            def get_questions(self, obj):
-                questions = obj.questions.all()
-                return QuestionSerializer(questions, many=True).data
-
-        return ExamDetailSerializer
+from course.models import Certificate, TestResult, UserAnswer, Answer, Question, Exam
 
 
-class SubmitExamAnswersView(generics.CreateAPIView):
-    serializer_class = UserExamResultSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class ExamResultsViewSet(viewsets.ViewSet):
+    def create(self, request, exam_id):
+        exam = Exam.objects.get(id=exam_id)
+        user_answers = request.data.get('user_answers')  # Ожидаем список словарей с вопросами и ответами
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        correct_answers = 0
+        total_questions = exam.questions.count()
+
+        for ua in user_answers:
+            question_id = ua['question_id']
+            selected_answer_id = ua['selected_answer_id']
+            question = Question.objects.get(id=question_id)
+            selected_answer = Answer.objects.get(id=selected_answer_id)
+
+            # Сохраняем ответ пользователя
+            UserAnswer.objects.create(
+                user=request.user,
+                question=question,
+                selected_answer=selected_answer
+            )
+
+            if selected_answer.is_correct:
+                correct_answers += 1
+
+        incorrect_answers = total_questions - correct_answers
+        score = correct_answers  # Или можно использовать другой алгоритм для расчета баллов
+
+        # Сохраняем результаты теста
+        TestResult.objects.create(
+            user=request.user,
+            exam=exam,
+            correct_answers=correct_answers,
+            incorrect_answers=incorrect_answers,
+            total_questions=total_questions,
+            score=score
+        )
+
+        # Условие для выдачи сертификата
+        certificate = None
+        if correct_answers >= exam.correct_answers_required:
+            certificate, created = Certificate.objects.get_or_create(user=request.user, exam=exam)
+            if created:
+                # Генерация сертификата
+                pdf_file = self.create_certificate_pdf(request.user.username, exam.title)
+                certificate.file.save(f"{request.user.username}_certificate.pdf", File(pdf_file))
+
+        return Response({
+            'correct_answers': correct_answers,
+            'incorrect_answers': incorrect_answers,
+            'total_questions': total_questions,
+            'score': score,
+            'certificate_issued': hasattr(certificate, 'id')  # Проверяем, выдан ли сертификат
+        }, status=status.HTTP_201_CREATED)
+
+

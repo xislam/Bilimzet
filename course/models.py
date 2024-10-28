@@ -154,7 +154,7 @@ class UserProgress(models.Model):
 
 
 class Exam(models.Model):
-    duration = models.ForeignKey(Duration, on_delete=models.CASCADE, verbose_name="Продолжительности курса")
+    duration = models.ForeignKey('Duration', on_delete=models.CASCADE, verbose_name="Продолжительность курса")
     title = models.CharField(max_length=255, verbose_name="Название экзамена")
     correct_answers_required = models.IntegerField(
         verbose_name="Количество правильных ответов для получения сертификата")
@@ -192,39 +192,46 @@ class Answer(models.Model):
         return self.text
 
 
-class UserExamResult(models.Model):
-    user = models.ForeignKey(User, related_name='exam_results', on_delete=models.CASCADE, verbose_name="Пользователь")
-    exam = models.ForeignKey(Exam, related_name='user_results', on_delete=models.CASCADE, verbose_name="Экзамен")
-    answers = models.ManyToManyField(Answer, through='UserAnswer', verbose_name="Ответы пользователя")
-    score = models.FloatField(default=0.0, verbose_name="Оценка")
-    total_questions = models.IntegerField(default=0, verbose_name="Всего вопросов")
-    correct_answers = models.IntegerField(default=0, verbose_name="Правильные ответы")
-    incorrect_answers = models.IntegerField(default=0, verbose_name="Неправильные ответы")
-
-    class Meta:
-        verbose_name = "Результат экзамена пользователя"
-        verbose_name_plural = "Результаты экзаменов пользователей"
-
-    def calculate_score(self):
-        if self.total_questions > 0:
-            self.score = (self.correct_answers / self.total_questions) * 100
-        else:
-            self.score = 0.0
-        self.save()
-
-    def __str__(self):
-        return f"{self.user.username} - {self.exam.title} - {self.score}%"
-
-
 class UserAnswer(models.Model):
-    user_exam_result = models.ForeignKey(UserExamResult, related_name='user_answers', on_delete=models.CASCADE,
-                                         verbose_name="Результат экзамена пользователя")
-    answer = models.ForeignKey(Answer, related_name='user_answers', on_delete=models.CASCADE, verbose_name="Ответ")
-    is_correct = models.BooleanField(default=False, verbose_name="Правильный ответ")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name="Вопрос")
+    selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE, verbose_name="Выбранный ответ")
 
     class Meta:
         verbose_name = "Ответ пользователя"
         verbose_name_plural = "Ответы пользователей"
 
     def __str__(self):
-        return f"{self.user_exam_result.user.name} - {self.answer.text} - {'Correct' if self.is_correct else 'Incorrect'}"
+        return f"{self.user.name} - {self.question.text} - {self.selected_answer.text}"
+
+
+class TestResult(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name="Экзамен")
+    correct_answers = models.IntegerField(default=0, verbose_name="Правильные ответы")
+    incorrect_answers = models.IntegerField(default=0, verbose_name="Неправильные ответы")
+    total_questions = models.IntegerField(default=0, verbose_name="Всего вопросов")
+    score = models.IntegerField(default=0, verbose_name="Баллы")
+    certificate_issued = models.BooleanField(default=False, verbose_name="Сертификат выдан")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Результат теста"
+        verbose_name_plural = "Результаты тестов"
+
+    def __str__(self):
+        return f"Результаты {self.user.name} для {self.exam.title}"
+
+
+class Certificate(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name="Экзамен")
+    issued_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='certificates/', null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Сертификат"
+        verbose_name_plural = "Сертификаты"
+
+    def __str__(self):
+        return f"Сертификат для {self.user.name} по {self.exam.title}"
