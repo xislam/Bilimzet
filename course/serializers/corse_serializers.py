@@ -162,3 +162,9 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
+
+
+class PurchaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Purchase
+        fields = ['id', 'course', 'duration', 'purchased_at', 'kaspi', 'payment_status', 'payment_method']

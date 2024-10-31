@@ -1,13 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, permissions
 import django_filters
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from course.models import Course, Category, Review
+from course.models import Course, Category, Review, Purchase
 from course.serializers.corse_serializers import CourseListSerializer, CourseDetailSerializer, \
-    CoursePromotionSerializer, CategorySerializer, ReviewSerializer
+    CoursePromotionSerializer, CategorySerializer, ReviewSerializer, PurchaseSerializer
 
 
 class CourseFilter(django_filters.FilterSet):
@@ -65,3 +65,13 @@ class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
+
+
+class PurchaseListView(generics.ListAPIView):
+    serializer_class = PurchaseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (JWTAuthentication,)
+
+    def get_queryset(self):
+        # Получаем все покупки текущего пользователя
+        return Purchase.objects.filter(user=self.request.user)

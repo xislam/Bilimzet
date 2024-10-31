@@ -5,7 +5,7 @@ from course.api.crud_progress import UserProgressListView, UserProgressView
 from course.api.exam_api import ExamDetailView, ExamResultsViewSet, MyCertificatesView
 from course.api.kaspi_api import PurchaseCreateView
 from course.api.list_couse import CourseListView, CourseDetailView, CourseWithPromotionList, CategoryListView, \
-    ReviewListCreateView, ReviewDetailView
+    ReviewListCreateView, ReviewDetailView, PurchaseListView
 from root import settings
 
 urlpatterns = [
@@ -25,5 +25,6 @@ urlpatterns = [
     path('reviews/<int:pk>/', ReviewDetailView.as_view(), name='review-detail'),
     path('exams/<int:exam_id>/results/', ExamResultsViewSet.as_view({'post': 'create'}), name='exam-results'),
     path('my/certificates/', MyCertificatesView.as_view(), name='certificate-list'),
+    path('purchases/', PurchaseListView.as_view(), name='purchase-list'),
 
 ]
