@@ -164,7 +164,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class PurchaseSerializer(serializers.ModelSerializer):
+class ListPurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = ['id', 'course', 'duration', 'purchased_at', 'kaspi', 'payment_status', 'payment_method']

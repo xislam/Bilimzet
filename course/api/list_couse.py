@@ -7,7 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from course.models import Course, Category, Review, Purchase
 from course.serializers.corse_serializers import CourseListSerializer, CourseDetailSerializer, \
-    CoursePromotionSerializer, CategorySerializer, ReviewSerializer, PurchaseSerializer
+    CoursePromotionSerializer, CategorySerializer, ReviewSerializer, ListPurchaseSerializer
 
 
 class CourseFilter(django_filters.FilterSet):
@@ -68,7 +68,7 @@ class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PurchaseListView(generics.ListAPIView):
-    serializer_class = PurchaseSerializer
+    serializer_class = ListPurchaseSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
 
