@@ -1,4 +1,4 @@
-from rest_framework import status, viewsets, generics
+from rest_framework import status, viewsets, generics, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from PIL import Image, ImageDraw, ImageFont
@@ -163,24 +163,12 @@ class ExamDetailView(generics.RetrieveAPIView):
     lookup_field = 'id'
 
 
-class CertificateListView(generics.ListAPIView):
-    queryset = Certificate.objects.all()
+class MyCertificatesView(generics.ListAPIView):
     serializer_class = CertificateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
 
     def get_queryset(self):
-        """
-        Optionally restricts the returned certificates to a given user or exam,
-        by filtering against a `user_id` or `exam_id` query parameter in the URL.
-        """
-        queryset = super().get_queryset()
-        user_id = self.request.query_params.get('user_id', None)
-        exam_id = self.request.query_params.get('exam_id', None)
-
-        if user_id is not None:
-            queryset = queryset.filter(user_id=user_id)
-        if exam_id is not None:
-            queryset = queryset.filter(exam_id=exam_id)
-
-        return queryset
+        # Получаем сертификаты только для текущего пользователя
+        user = self.request.user
+        return Certificate.objects.filter(user=user)

@@ -134,20 +134,22 @@ class UserProgress(models.Model):
                                  verbose_name="Продолжительность")
     course = models.ForeignKey(Course, related_name='progress', on_delete=models.CASCADE, verbose_name="Курс")
     completed_modules = models.ManyToManyField(Module, blank=True, verbose_name="Пройденные модули")
-    progress_percentage = models.FloatField(default=0.0, verbose_name="Прогресс в процентах")
 
     class Meta:
         verbose_name = "Прогресс пользователя"
         verbose_name_plural = "Прогрессы пользователей"
 
     def update_progress(self):
-        total_modules = self.duration.modules.count()  # Изменено на duration
+        total_modules = self.duration.modules.count()
         completed_modules = self.completed_modules.count()
         if total_modules > 0:
-            self.progress_percentage = (completed_modules / total_modules) * 100
+            return (completed_modules / total_modules) * 100  # Возвращает процент
         else:
-            self.progress_percentage = 0
-        self.save()
+            return 0
+
+    @property
+    def progress_percentage(self):
+        return self.update_progress()
 
     def __str__(self):
         return f"{self.user.name} - {self.course.title} (Продолжительность: {self.duration.number_hours} часов) - {self.progress_percentage}%"

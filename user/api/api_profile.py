@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from user.serializers.profile import UserProfileSerializer
+from user.models import AdditionalInfo
+from user.serializers.profile import UserProfileSerializer, AdditionalInfoSerializer
 
 
 class UserProfileDetailView(generics.RetrieveAPIView):
@@ -75,3 +76,15 @@ class UserPasswordUpdateView(generics.UpdateAPIView):
         # You can also log the user out by removing their refresh token if needed
 
         return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+
+class AdditionalInfoView(generics.RetrieveUpdateAPIView):
+    serializer_class = AdditionalInfoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (JWTAuthentication,)
+
+    def get_object(self):
+        # Получаем или создаем объект дополнительной информации для текущего пользователя
+        user = self.request.user
+        additional_info, created = AdditionalInfo.objects.get_or_create(user=user)
+        return additional_info

@@ -62,3 +62,20 @@ class VerificationCode(models.Model):
 
     def __str__(self):
         return f"Verification code for {self.user.phone_number}"
+
+
+class AdditionalInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    iin = models.CharField(max_length=12, verbose_name="ИИН")
+    position = models.CharField(max_length=100, verbose_name="Должность")
+    workplace = models.CharField(max_length=100, verbose_name="Место работы")
+    phone_number = models.CharField(max_length=15, verbose_name="Номер телефона")
+    education_diploma = models.FileField(upload_to='diplomas', null=True, blank=True,
+                                         verbose_name="Диплом об образовании")
+
+    class Meta:
+        verbose_name = "Дополнительная информация"
+        verbose_name_plural = "Дополнительные информации"
+
+    def __str__(self):
+        return f"Дополнительная информация для {self.user.name}"
