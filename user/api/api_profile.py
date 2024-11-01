@@ -88,3 +88,16 @@ class AdditionalInfoView(generics.RetrieveUpdateAPIView):
         user = self.request.user
         additional_info, created = AdditionalInfo.objects.get_or_create(user=user)
         return additional_info
+
+
+class AdditionalInfoCreateView(generics.CreateAPIView):
+    serializer_class = AdditionalInfoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (JWTAuthentication,)
+
+    def create(self, request, *args, **kwargs):
+        # Обработка создания нового объекта дополнительной информации
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        additional_info = serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
