@@ -5,7 +5,7 @@ from course.api.crud_progress import UserProgressListView, UserProgressView
 from course.api.exam_api import ExamDetailView, ExamResultsViewSet, MyCertificatesView
 from course.api.kaspi_api import PurchaseCreateView
 from course.api.list_couse import CourseListView, CourseDetailView, CourseWithPromotionList, CategoryListView, \
-    ReviewListCreateView, ReviewDetailView, PurchaseListView
+    ReviewListCreateView, ReviewDetailView, PurchaseListView, UniqueNumberHoursListView
 from root import settings
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('categories/', CategoryListView.as_view(), name='category-list'),
 
     path('exams/<int:id>/', ExamDetailView.as_view(), name='exam-detail'),
+    path('unique-number-hours/', UniqueNumberHoursListView.as_view(), name='unique-number-hours'),
 
     path('progress/', UserProgressListView.as_view(), name='user-progress-list'),
     path('progress/<int:course_id>/<int:duration_id>/', UserProgressView.as_view(), name='user-progress'),

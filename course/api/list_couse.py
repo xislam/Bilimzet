@@ -5,9 +5,9 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from course.models import Course, Category, Review, Purchase
+from course.models import Course, Category, Review, Purchase, Duration
 from course.serializers.corse_serializers import CourseListSerializer, CourseDetailSerializer, \
-    CoursePromotionSerializer, CategorySerializer, ReviewSerializer, ListPurchaseSerializer
+    CoursePromotionSerializer, CategorySerializer, ReviewSerializer, ListPurchaseSerializer, UniqueNumberHoursSerializer
 
 
 class CourseFilter(django_filters.FilterSet):
@@ -75,3 +75,11 @@ class PurchaseListView(generics.ListAPIView):
     def get_queryset(self):
         # Получаем все покупки текущего пользователя
         return Purchase.objects.filter(user=self.request.user)
+
+
+class UniqueNumberHoursListView(generics.ListAPIView):
+    serializer_class = UniqueNumberHoursSerializer
+
+    def get_queryset(self):
+        # Use distinct to get unique number_hours
+        return Duration.objects.values('number_hours').distinct()

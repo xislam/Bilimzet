@@ -175,3 +175,9 @@ class ListPurchaseSerializer(serializers.ModelSerializer):
     def get_course(self, obj):
         # Assuming obj.course is the Course instance
         return obj.course.title if obj.course else None
+
+
+class UniqueNumberHoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Duration
+        fields = ['number_hours']
