@@ -179,8 +179,6 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         for duration in duration_instances:
             if duration.certificate:
                 certificates.append({
-                    'duration_id': duration.id,
-                    'duration_hours': duration.number_hours,
                     'certificate_url': duration.certificate.url,
                 })
         return certificates
