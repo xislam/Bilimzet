@@ -173,18 +173,14 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         return None
 
     def get_certificates(self, obj):
-        user = self.context.get('request', None)
-        if user and hasattr(user, 'user') and user.user.is_authenticated:
-            user = user.user
-            # Получаем сертификаты для экзаменов, связанных с курсом
-            certificates = Certificate.objects.filter(user=user, exam__duration__course=obj)
-            return [{
-                'id': cert.id,
-                'exam_title': cert.exam.title,
-                'issued_at': cert.issued_at,
-                'file_url': cert.file.url if cert.file else None
-            } for cert in certificates]
-        return []
+        # Получаем сертификаты для экзаменов, связанных с курсом
+        certificates = Certificate.objects.filter(exam__duration__course=obj)
+        return [{
+            'id': cert.id,
+            'exam_title': cert.exam.title,
+            'issued_at': cert.issued_at,
+            'file_url': cert.file.url if cert.file else None
+        } for cert in certificates]
 
 
 class CoursePromotionSerializer(serializers.ModelSerializer):
