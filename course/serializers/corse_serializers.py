@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category, Exam
+from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category, Exam, \
+    Certificate
 
 
 class InstructorSerializer(serializers.ModelSerializer):
@@ -25,7 +26,8 @@ class ModuleSerializer(serializers.ModelSerializer):
 class DurationSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     exam_ids = serializers.SerializerMethodField()
-    is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
+    is_purchased = serializers.SerializerMethodField()  # Check if the course was purchased
+    certificate_files = serializers.SerializerMethodField()  # New field for certificate files
 
     class Meta:
         model = Duration
@@ -35,13 +37,20 @@ class DurationSerializer(serializers.ModelSerializer):
         return [exam.id for exam in obj.exam_set.all()]
 
     def get_is_purchased(self, obj):
-        # Проверяем, куплен ли курс пользователем
         user = self.context.get('request', None)
         if user and hasattr(user, 'user') and user.user.is_authenticated:
             user = user.user
-            purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
+            purchase = Purchase.objects.filter(course=obj.course, user=user, payment_status='completed').first()
             return purchase is not None
         return False
+
+    def get_certificate_files(self, obj):
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+            certificates = Certificate.objects.filter(user=user, exam__duration=obj)
+            return [certificate.file.url for certificate in certificates if certificate.file]
+        return []
 
 
 class CourseListSerializer(serializers.ModelSerializer):
