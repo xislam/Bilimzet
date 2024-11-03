@@ -107,13 +107,14 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField()
     is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
     purchase_details = serializers.SerializerMethodField()  # Информация о продолжительности курса, если куплен
+    certificates = serializers.SerializerMethodField()  # Новый метод для получения сертификатов
 
     class Meta:
         model = Course
         fields = [
             'id', 'category', 'img', 'doc', 'title', 'description', 'review_count', 'module_count', 'instructor',
             'reviews',
-            'user_progress', 'duration', 'is_purchased', 'purchase_details'
+            'user_progress', 'duration', 'is_purchased', 'purchase_details', 'certificates'
         ]
 
     def get_duration(self, obj):
@@ -170,6 +171,20 @@ class CourseDetailSerializer(serializers.ModelSerializer):
                     'payment_method': purchase.payment_method,
                 }
         return None
+
+    def get_certificates(self, obj):
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+            # Получаем сертификаты для экзаменов, связанных с курсом
+            certificates = Certificate.objects.filter(user=user, exam__duration__course=obj)
+            return [{
+                'id': cert.id,
+                'exam_title': cert.exam.title,
+                'issued_at': cert.issued_at,
+                'file_url': cert.file.url if cert.file else None
+            } for cert in certificates]
+        return []
 
 
 class CoursePromotionSerializer(serializers.ModelSerializer):
