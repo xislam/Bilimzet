@@ -107,7 +107,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField()
     is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
     purchase_details = serializers.SerializerMethodField()  # Информация о продолжительности курса, если куплен
-    certificates = serializers.SerializerMethodField()  # Новый метод для получения сертификатов
+    certificates = serializers.SerializerMethodField()  # Новое поле для сертификатов
 
     class Meta:
         model = Course
@@ -173,14 +173,17 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         return None
 
     def get_certificates(self, obj):
-        # Получаем сертификаты для экзаменов, связанных с курсом
-        certificates = Certificate.objects.filter(exam__duration__course=obj)
-        return [{
-            'id': cert.id,
-            'exam_title': cert.exam.title,
-            'issued_at': cert.issued_at,
-            'file_url': cert.file.url if cert.file else None
-        } for cert in certificates]
+        # Возвращает список сертификатов из всех продолжительностей курса
+        duration_instances = Duration.objects.filter(course=obj)
+        certificates = []
+        for duration in duration_instances:
+            if duration.certificate:
+                certificates.append({
+                    'duration_id': duration.id,
+                    'duration_hours': duration.number_hours,
+                    'certificate_url': duration.certificate.url,
+                })
+        return certificates
 
 
 class CoursePromotionSerializer(serializers.ModelSerializer):
