@@ -166,7 +166,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ListPurchaseSerializer(serializers.ModelSerializer):
     duration = DurationSerializer()
+    course = serializers.SerializerMethodField()
 
     class Meta:
         model = Purchase
         fields = ['id', 'course', 'duration', 'purchased_at', 'kaspi', 'payment_status', 'payment_method']
+
+    def get_course(self, obj):
+        # Assuming obj.course is the Course instance
+        return obj.course.title if obj.course else None
