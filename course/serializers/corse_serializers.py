@@ -27,7 +27,7 @@ class DurationSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     exam_ids = serializers.SerializerMethodField()
     is_purchased = serializers.SerializerMethodField()  # Check if the course was purchased
-    certificate_files = serializers.SerializerMethodField()  # New field for certificate files
+    certificate_file = serializers.SerializerMethodField()  # New field for certificate files
 
     class Meta:
         model = Duration
@@ -44,13 +44,17 @@ class DurationSerializer(serializers.ModelSerializer):
             return purchase is not None
         return False
 
-    def get_certificate_files(self, obj):
+    def get_certificate_file(self, obj):
         user = self.context.get('request', None)
         if user and hasattr(user, 'user') and user.user.is_authenticated:
             user = user.user
-            certificates = Certificate.objects.filter(user=user, exam__duration=obj)
-            return [certificate.file.url for certificate in certificates if certificate.file]
-        return []
+            # Предполагаем, что у каждой продолжительности только один экзамен
+            exam = obj.exam_set.first()
+            if exam:
+                certificate = Certificate.objects.filter(user=user, exam=exam).first()
+                if certificate and certificate.file:
+                    return certificate.file.url  # Возвращаем URL сертификата
+        return None
 
 
 class CourseListSerializer(serializers.ModelSerializer):
