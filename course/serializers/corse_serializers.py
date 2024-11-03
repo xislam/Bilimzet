@@ -25,7 +25,6 @@ class ModuleSerializer(serializers.ModelSerializer):
 class DurationSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     exam_ids = serializers.SerializerMethodField()
-    is_purchased = serializers.SerializerMethodField()
 
     class Meta:
         model = Duration
@@ -33,13 +32,6 @@ class DurationSerializer(serializers.ModelSerializer):
 
     def get_exam_ids(self, obj):
         return [exam.id for exam in obj.exam_set.all()]
-
-    def get_is_purchased(self, obj):
-        user = self.context.get('request').user  # Get the user from the context
-        if user.is_authenticated:
-            # Check if there is a purchase for this duration and user
-            return Purchase.objects.filter(duration=obj, user=user).exists()
-        return False
 
 
 class CourseListSerializer(serializers.ModelSerializer):
