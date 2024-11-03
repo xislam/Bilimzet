@@ -25,6 +25,7 @@ class ModuleSerializer(serializers.ModelSerializer):
 class DurationSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     exam_ids = serializers.SerializerMethodField()
+    is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
 
     class Meta:
         model = Duration
@@ -32,6 +33,15 @@ class DurationSerializer(serializers.ModelSerializer):
 
     def get_exam_ids(self, obj):
         return [exam.id for exam in obj.exam_set.all()]
+
+    def get_is_purchased(self, obj):
+        # Проверяем, куплен ли курс пользователем
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+            purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
+            return purchase is not None
+        return False
 
 
 class CourseListSerializer(serializers.ModelSerializer):
