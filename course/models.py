@@ -75,6 +75,8 @@ class Duration(models.Model):
     course = models.ForeignKey(Course, verbose_name='Курс', on_delete=models.CASCADE)
     number_hours = models.IntegerField(verbose_name='Количество часов', default=0)
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
+    certificate = models.FileField(upload_to='certificates/', null=True, blank=True,
+                                   verbose_name='Сертификат')
 
     def __str__(self):
         return f"{self.course}, {self.number_hours}, {self.price}"
