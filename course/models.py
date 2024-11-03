@@ -56,6 +56,7 @@ class Course(models.Model):
                                    verbose_name="Преподаватель")
     language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, verbose_name="Язык курса")
     has_promotion = models.BooleanField(default=False, verbose_name="Акция применима")
+    doc = models.FileField(verbose_name='Информация о курсе виде файла', upload_to='doc_curs', null=True, blank=True)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Процент скидки")
 
     class Meta:
