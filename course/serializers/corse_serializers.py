@@ -52,7 +52,7 @@ class DurationSerializer(serializers.ModelSerializer):
             user = user.user
             # Проверяем, есть ли покупка для данной продолжительности у пользователя
             purchase_exists = Purchase.objects.filter(user=user, duration=obj, payment_status='completed')
-            return purchase_exists
+            return True
         return False
 
 
