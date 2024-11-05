@@ -106,8 +106,8 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     user_progress = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
-    is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
-    purchase_details = serializers.SerializerMethodField()  # Информация о продолжительности курса, если куплен
+    # is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки, был ли курс куплен
+    # purchase_details = serializers.SerializerMethodField()  # Информация о продолжительности курса, если куплен
     certificates = serializers.SerializerMethodField()  # Новое поле для сертификатов
 
     class Meta:
