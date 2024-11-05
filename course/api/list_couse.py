@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions
 import django_filters
@@ -21,7 +22,9 @@ class CourseFilter(django_filters.FilterSet):
 
 
 class CourseListView(generics.ListAPIView):
-    queryset = Course.objects.all()
+    queryset = Course.objects.prefetch_related(
+        Prefetch('duration_set', queryset=Duration.objects.all())
+    ).all()
     serializer_class = CourseDetailSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = CourseFilter

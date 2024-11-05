@@ -118,11 +118,12 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_duration(self, obj):
-        # Получаем продолжительности для курса
-        duration_instances = Duration.objects.filter(course=obj)
+        # Получаем продолжительности для курса (уже загружены с помощью prefetch_related)
+        duration_instances = obj.duration_set.all()
         if duration_instances:
-            # Передаем контекст для DurationSerializer, чтобы он знал о текущем пользователе
-            return DurationSerializer(duration_instances, many=True, context=self.context).data
+            # Передаем контекст с пользователем в DurationSerializer
+            context = self.context
+            return DurationSerializer(duration_instances, many=True, context=context).data
         return None
 
     def get_user_progress(self, obj):
