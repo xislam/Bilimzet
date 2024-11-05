@@ -28,8 +28,8 @@ class ModuleSerializer(serializers.ModelSerializer):
 class DurationSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     exam_ids = serializers.SerializerMethodField()
-    is_purchased = serializers.SerializerMethodField()  # Check if the course was purchased
-    certificate_files_user = serializers.SerializerMethodField()  # New field for certificate files
+    certificate_files_user = serializers.SerializerMethodField()  # Новое поле для файлов сертификатов
+    is_purchased = serializers.SerializerMethodField()  # Новое поле для проверки покупки
 
     class Meta:
         model = Duration
@@ -38,28 +38,6 @@ class DurationSerializer(serializers.ModelSerializer):
     def get_exam_ids(self, obj):
         return [exam.id for exam in obj.exam_set.all()]
 
-    def get_is_purchased(self, obj):
-        user = self.context.get('request', None)
-        if user and hasattr(user, 'user') and user.user.is_authenticated:
-            user = user.user  # Get the authenticated user
-
-            # Логирование данных пользователя
-            logger.debug(f"Checking purchase for user: {user.id}, duration: {obj.id}")
-
-            # Фильтруем покупки по пользователю и продолжительности
-            purchase = Purchase.objects.filter(user=user, duration=obj, payment_status='completed').first()
-
-            # Логирование результата фильтрации
-            if purchase:
-                logger.debug(f"Purchase found: {purchase.id}")
-            else:
-                logger.debug("No purchase found or status is not 'completed'")
-
-            return purchase is not None  # Return True if purchase is found, else False
-        else:
-            logger.debug("User is not authenticated or context is missing")
-        return False
-
     def get_certificate_files_user(self, obj):
         user = self.context.get('request', None)
         if user and hasattr(user, 'user') and user.user.is_authenticated:
@@ -67,6 +45,15 @@ class DurationSerializer(serializers.ModelSerializer):
             certificates = Certificate.objects.filter(user=user, exam__duration=obj)
             return [certificate.file.url for certificate in certificates if certificate.file]
         return []
+
+    def get_is_purchased(self, obj):
+        user = self.context.get('request', None)
+        if user and hasattr(user, 'user') and user.user.is_authenticated:
+            user = user.user
+            # Проверяем, есть ли покупка для данной продолжительности у пользователя
+            purchase_exists = Purchase.objects.filter(user=user, duration=obj, payment_status='completed').exists()
+            return purchase_exists
+        return False
 
 
 class CourseListSerializer(serializers.ModelSerializer):
