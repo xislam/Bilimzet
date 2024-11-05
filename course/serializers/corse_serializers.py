@@ -1,3 +1,5 @@
+from venv import logger
+
 from rest_framework import serializers
 
 from course.models import Course, Module, Review, Instructor, UserProgress, Duration, Purchase, Category, Exam, \
@@ -40,9 +42,22 @@ class DurationSerializer(serializers.ModelSerializer):
         user = self.context.get('request', None)
         if user and hasattr(user, 'user') and user.user.is_authenticated:
             user = user.user  # Get the authenticated user
-            # Check if there is any purchase of the Duration for this user
+
+            # Логирование данных пользователя
+            logger.debug(f"Checking purchase for user: {user.id}, duration: {obj.id}")
+
+            # Фильтруем покупки по пользователю и продолжительности
             purchase = Purchase.objects.filter(user=user, duration=obj, payment_status='completed').first()
-            return purchase is not None  # Return True if purchased, False otherwise
+
+            # Логирование результата фильтрации
+            if purchase:
+                logger.debug(f"Purchase found: {purchase.id}")
+            else:
+                logger.debug("No purchase found or status is not 'completed'")
+
+            return purchase is not None  # Return True if purchase is found, else False
+        else:
+            logger.debug("User is not authenticated or context is missing")
         return False
 
     def get_certificate_files_user(self, obj):
