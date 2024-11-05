@@ -39,9 +39,10 @@ class DurationSerializer(serializers.ModelSerializer):
     def get_is_purchased(self, obj):
         user = self.context.get('request', None)
         if user and hasattr(user, 'user') and user.user.is_authenticated:
-            user = user.user
-            purchase = Purchase.objects.filter(course=obj.course, user=user, payment_status='completed').first()
-            return purchase is not None
+            user = user.user  # Get the authenticated user
+            # Check if there is any purchase of the Duration for this user
+            purchase = Purchase.objects.filter(user=user, duration=obj, payment_status='completed').first()
+            return purchase is not None  # Return True if purchased, False otherwise
         return False
 
     def get_certificate_files_user(self, obj):
@@ -149,28 +150,28 @@ class CourseDetailSerializer(serializers.ModelSerializer):
                 'progress_percentage': 0.0
             }
 
-    def get_is_purchased(self, obj):
-        # Проверяем, куплен ли курс пользователем
-        user = self.context.get('request', None)
-        if user and hasattr(user, 'user') and user.user.is_authenticated:
-            user = user.user
-            purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
-            return purchase is not None
-        return False
-
-    def get_purchase_details(self, obj):
-        # Возвращает подробности о покупке курса, если он был куплен
-        user = self.context.get('request', None)
-        if user and hasattr(user, 'user') and user.user.is_authenticated:
-            user = user.user
-            purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
-            if purchase:
-                return {
-                    'purchase_at': purchase.purchased_at,
-                    'duration': DurationSerializer(purchase.duration).data,
-                    'payment_method': purchase.payment_method,
-                }
-        return None
+    # def get_is_purchased(self, obj):
+    #     # Проверяем, куплен ли курс пользователем
+    #     user = self.context.get('request', None)
+    #     if user and hasattr(user, 'user') and user.user.is_authenticated:
+    #         user = user.user
+    #         purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
+    #         return purchase is not None
+    #     return False
+    #
+    # def get_purchase_details(self, obj):
+    #     # Возвращает подробности о покупке курса, если он был куплен
+    #     user = self.context.get('request', None)
+    #     if user and hasattr(user, 'user') and user.user.is_authenticated:
+    #         user = user.user
+    #         purchase = Purchase.objects.filter(course=obj, user=user, payment_status='completed').first()
+    #         if purchase:
+    #             return {
+    #                 'purchase_at': purchase.purchased_at,
+    #                 'duration': DurationSerializer(purchase.duration).data,
+    #                 'payment_method': purchase.payment_method,
+    #             }
+    #     return None
 
     def get_certificates(self, obj):
         # Возвращает список сертификатов из всех продолжительностей курса
