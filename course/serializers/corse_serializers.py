@@ -115,7 +115,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'category', 'img', 'doc', 'title', 'description', 'review_count', 'module_count', 'instructor',
             'reviews',
-            'user_progress', 'duration', 'is_purchased', 'purchase_details', 'certificates'
+            'user_progress', 'duration', 'certificates'
         ]
 
     def get_duration(self, obj):
