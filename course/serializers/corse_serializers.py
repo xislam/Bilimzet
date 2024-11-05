@@ -50,11 +50,10 @@ class DurationSerializer(serializers.ModelSerializer):
         user = self.context.get('request', None)
         if user and hasattr(user, 'user') and user.user.is_authenticated:
             user = user.user
-            # Проверяем, есть ли покупка для данной продолжительности у пользователя
-            purchase_exists = Purchase.objects.filter(user=user, duration=obj, payment_status='completed')
+            # Проверяем, есть ли покупка для данной продолжительности у пользователя и с успешным статусом
+            purchase_exists = Purchase.objects.filter(user=user, duration=obj, payment_status='completed').exists()
             return purchase_exists
         return False
-
 
 class CourseListSerializer(serializers.ModelSerializer):
     review_count = serializers.IntegerField(read_only=True)
