@@ -51,7 +51,7 @@ class DurationSerializer(serializers.ModelSerializer):
         if user and hasattr(user, 'user') and user.user.is_authenticated:
             user = user.user
             # Проверяем, есть ли покупка для данной продолжительности у пользователя
-            purchase_exists = Purchase.objects.filter(user=user, duration=obj, payment_status='completed').exists()
+            purchase_exists = Purchase.objects.filter(user=user, duration=obj, payment_status='completed')
             return purchase_exists
         return False
 
