@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from user.models import User
@@ -163,6 +164,11 @@ class Exam(models.Model):
     title = models.CharField(max_length=255, verbose_name="Название экзамена")
     correct_answers_required = models.IntegerField(
         verbose_name="Количество правильных ответов для получения сертификата")
+
+    def save(self, *args, **kwargs):
+        if Exam.objects.filter(duration=self.duration).exists():
+            raise ValidationError("Exam with this duration already exists.")
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Экзамен"
