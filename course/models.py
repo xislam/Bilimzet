@@ -167,7 +167,7 @@ class Exam(models.Model):
 
     def save(self, *args, **kwargs):
         if Exam.objects.filter(duration=self.duration).exists():
-            raise ValidationError("Exam with this duration already exists.")
+            raise ValidationError("Экзамен с таким временем проведения уже существует.")
         super().save(*args, **kwargs)
 
     class Meta:
