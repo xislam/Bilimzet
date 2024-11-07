@@ -37,11 +37,12 @@ class DurationSerializer(serializers.ModelSerializer):
         return [exam.id for exam in obj.exam_set.all()]
 
     def get_is_purchased(self, obj):
-        user = self.context.get('request', None)
-        if user and hasattr(user, 'user') and user.user.is_authenticated:
-            user = user.user
-            purchase = Purchase.objects.filter(course=obj.course, user=user, payment_status='completed').first()
-            return purchase is not None
+        request = self.context.get('request', None)
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            user = request.user
+            # Проверяем, существует ли покупка с данным пользователем, продолжительностью и статусом "completed"
+            purchase = Purchase.objects.filter(duration=obj, user=user, payment_status='completed').exists()
+            return purchase
         return False
 
     def get_certificate_files_user(self, obj):
